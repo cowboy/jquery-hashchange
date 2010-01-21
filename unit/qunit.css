@@ -18,6 +18,9 @@ li {
 
 #qunit-tests {
   font-size: smaller;
+  /* IE6/7 seem to have trouble displaying an OL with no LI children */
+  #border-bottom: 1px solid #fff;
+  #margin-bottom: -1px;
 }
 
 #qunit-tests li {
@@ -131,15 +134,18 @@ p a:hover {
   color: #000;
 }
 
-#qunit-banner {
+/* Added span inside #qunit-banner to work around IE6 #id.class bug */
+#qunit-banner span {
+  display: block;
   height: 5px;
+  _overflow: hidden;
 }
 
-#qunit-banner.qunit-pass {
+#qunit-banner.qunit-pass span {
   background-color: #0a0;
 }
 
-#qunit-banner.qunit-fail,
+#qunit-banner.qunit-fail span,
 #qunit-testrunner-toolbar {
   background-color: #f99;
 }

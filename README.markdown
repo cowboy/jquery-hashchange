@@ -1,7 +1,7 @@
 # jQuery hashchange event #
 [http://benalman.com/projects/jquery-hashchange-plugin/](http://benalman.com/projects/jquery-hashchange-plugin/)
 
-Version: 1.0, Last updated: 1/9/2010
+Version: 1.1, Last updated: 1/21/2010
 
 This jQuery plugin enables very basic bookmarkable #hash history via a cross-browser window.onhashchange event.
 
@@ -24,7 +24,7 @@ tested with, what browsers it has been tested in, and where the unit tests
 reside (so you can test it yourself).
 
 ### jQuery Versions ###
-1.3.2, 1.4a2
+1.3.2, 1.4
 
 ### Browsers Tested ###
 Internet Explorer 6-8, Firefox 2-3.7, Safari 3-4, Chrome, Opera 9.6-10.1.
@@ -54,6 +54,7 @@ WebKit: Back Button in an Iframe
 
 ## Release History ##
 
+1.1 - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug where browser version is incorrectly reported as 8.0, despite inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.  
 1.0 - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special window.onhashchange functionality into a separate plugin for users who want just the basic event & back button support, without all the extra awesomeness that BBQ provides. This plugin will be included as part of jQuery BBQ, but also be available separately.
 
 

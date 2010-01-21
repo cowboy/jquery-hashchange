@@ -13,7 +13,7 @@ $shell['h3'] = ob_get_contents();
 ob_end_clean();
 
 $shell['jquery'] = 'jquery-1.3.2.js';
-//$shell['jquery'] = 'jquery-1.4a2.js';
+//$shell['jquery'] = 'jquery-1.4.js';
 
 $shell['shBrush'] = array( 'JScript' );
 

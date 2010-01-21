@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.0 - 1/9/2010
+ * jQuery hashchange event - v1.1 - 1/21/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.0, Last updated: 1/9/2010*
+// *Version: 1.1, Last updated: 1/21/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -35,7 +35,7 @@
 // tested with, what browsers it has been tested in, and where the unit tests
 // reside (so you can test it yourself).
 // 
-// jQuery Versions - 1.3.2, 1.4a2
+// jQuery Versions - 1.3.2, 1.4
 // Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-4, Chrome, Opera 9.6-10.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
@@ -52,13 +52,16 @@
 // 
 // About: Release History
 // 
+// 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
+//         where browser version is incorrectly reported as 8.0, despite
+//         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
 // 1.0   - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special
 //         window.onhashchange functionality into a separate plugin for users
 //         who want just the basic event & back button support, without all the
 //         extra awesomeness that BBQ provides. This plugin will be included as
 //         part of jQuery BBQ, but also be available separately.
 
-(function($,window){
+(function($,window,undefined){
   '$:nomunge'; // Used by YUI compressor.
   
   // A convenient shortcut.
@@ -74,7 +77,8 @@
     // IE6/7 specifically need some special love when it comes to back-button
     // support, so let's do a little browser sniffing..
     browser = $.browser,
-    is_old_ie = browser.msie && browser.version < 8,
+    mode = document.documentMode,
+    is_old_ie = browser.msie && ( mode === undefined || mode < 8 ),
     
     // Does the browser support window.onhashchange? Test for IE version, since
     // IE8 incorrectly reports this when in "IE7" or "IE8 Compatibility View"!
