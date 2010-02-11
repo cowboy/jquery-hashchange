@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.1 - 1/21/2010
+ * jQuery hashchange event - v1.2 - 2/11/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.1, Last updated: 1/21/2010*
+// *Version: 1.2, Last updated: 2/11/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -35,7 +35,7 @@
 // tested with, what browsers it has been tested in, and where the unit tests
 // reside (so you can test it yourself).
 // 
-// jQuery Versions - 1.3.2, 1.4.1
+// jQuery Versions - 1.3.2, 1.4.1, 1.4.2pre
 // Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-4, Chrome, Opera 9.6-10.1.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
@@ -49,9 +49,16 @@
 // Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
 // Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
 // WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
+// Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
 // 
 // About: Release History
 // 
+// 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
+//         from a page on another domain would cause an error in Safari 4. Also,
+//         IE6/7 Iframe is now inserted after the body (this actually works),
+//         which prevents the page from scrolling when the event is first bound.
+//         Event can also now be bound before DOM ready, but it won't be usable
+//         before then in IE6/7.
 // 1.1   - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug
 //         where browser version is incorrectly reported as 8.0, despite
 //         inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.
@@ -64,15 +71,14 @@
 (function($,window,undefined){
   '$:nomunge'; // Used by YUI compressor.
   
-  // A convenient shortcut.
-  var loc = window.location,
-    
-    // Method / object references.
-    fake_onhashchange,
+  // Method / object references.
+  var fake_onhashchange,
     jq_event_special = $.event.special,
     
     // Reused strings.
+    str_location = 'location',
     str_hashchange = 'hashchange',
+    str_href = 'href',
     
     // IE6/7 specifically need some special love when it comes to back-button
     // support, so let's do a little browser sniffing..
@@ -87,24 +93,24 @@
   // Get location.hash (or what you'd expect location.hash to be) sans any
   // leading #. Thanks for making this necessary, Firefox!
   function get_fragment( url ) {
-    url = url || loc.href;
+    url = url || window[ str_location ][ str_href ];
     return url.replace( /^[^#]*#?(.*)$/, '$1' );
   };
   
   // Property: jQuery.hashchangeDelay
   // 
-  // The numeric interval (in milliseconds) at which the <window.onhashchange>
+  // The numeric interval (in milliseconds) at which the <hashchange event>
   // polling loop executes. Defaults to 100.
   
   $[ str_hashchange + 'Delay' ] = 100;
   
-  // Event: window.onhashchange
+  // Event: hashchange event
   // 
-  // Fired when window.location.hash changes. In browsers that support it, the
-  // native window.onhashchange event is used (IE8, FF3.6), otherwise a polling
-  // loop is initialized, running every <jQuery.hashchangeDelay> milliseconds
-  // to see if the hash has changed. In IE 6 and 7, a hidden IFRAME is created
-  // to allow the back button and hash-based history to work.
+  // Fired when location.hash changes. In browsers that support it, the native
+  // window.onhashchange event is used (IE8, FF3.6), otherwise a polling loop is
+  // initialized, running every <jQuery.hashchangeDelay> milliseconds to see if
+  // the hash has changed. In IE 6 and 7, a hidden Iframe is created to allow
+  // the back button and hash-based history to work.
   // 
   // Usage:
   // 
@@ -115,11 +121,14 @@
   // 
   // Additional Notes:
   // 
-  // * The polling loop and iframe are not created until at least one callback
+  // * The polling loop and Iframe are not created until at least one callback
   //   is actually bound to 'hashchange'.
   // * If you need the bound callback(s) to execute immediately, in cases where
   //   the page 'state' exists on page load (via bookmark or page refresh, for
   //   example) use $(window).trigger( 'hashchange' );
+  // * The event can be bound before DOM ready, but since it won't be usable
+  //   before then in IE6/7 (due to the necessary Iframe), recommended usage is
+  //   to bind it inside a $(document).ready() callback.
   
   jq_event_special[ str_hashchange ] = $.extend( jq_event_special[ str_hashchange ], {
     
@@ -130,8 +139,8 @@
       
       // Otherwise, we need to create our own. And we don't want to call this
       // until the user binds to the event, just in case they never do, since it
-      // will create a polling loop and possibly even a hidden IFRAME.
-      fake_onhashchange.start();
+      // will create a polling loop and possibly even a hidden Iframe.
+      $( fake_onhashchange.start );
     },
     
     // Called only when the last 'hashchange' event is unbound from window.
@@ -140,7 +149,7 @@
       if ( supports_onhashchange ) { return false; }
       
       // Otherwise, we need to stop ours (if possible).
-      fake_onhashchange.stop();
+      $( fake_onhashchange.stop );
     }
     
   });
@@ -148,7 +157,7 @@
   // fake_onhashchange does all the work of triggering the window.onhashchange
   // event for browsers that don't natively support it, including creating a
   // polling loop to watch for hash changes and in IE 6/7 creating a hidden
-  // IFRAME to enable back and forward.
+  // Iframe to enable back and forward.
   fake_onhashchange = (function(){
     var self = {},
       timeout_id,
@@ -156,7 +165,7 @@
       set_history,
       get_history;
     
-    // Initialize. In IE 6/7, creates a hidden IFRAME for history handling.
+    // Initialize. In IE 6/7, creates a hidden Iframe for history handling.
     function init(){
       // Most browsers don't need special methods here..
       set_history = get_history = function(val){ return val; };
@@ -164,21 +173,22 @@
       // But IE6/7 do!
       if ( is_old_ie ) {
         
-        // Create hidden IFRAME at the end of the body.
-        iframe = $('<iframe src="javascript:0"/>').hide().appendTo( 'body' )[0].contentWindow;
+        // Create hidden Iframe after the end of the body to prevent initial
+        // page load from scrolling unnecessarily.
+        iframe = $('<iframe src="javascript:0"/>').hide().insertAfter( 'body' )[0].contentWindow;
         
-        // Get history by looking at the hidden IFRAME's location.hash.
+        // Get history by looking at the hidden Iframe's location.hash.
         get_history = function() {
-          return get_fragment( iframe.document.location.href );
+          return get_fragment( iframe.document[ str_location ][ str_href ] );
         };
         
-        // Set a new history item by opening and then closing the IFRAME
+        // Set a new history item by opening and then closing the Iframe
         // document, *then* setting its location.hash.
         set_history = function( hash, history_hash ) {
           if ( hash !== history_hash ) {
             var doc = iframe.document;
             doc.open().close();
-            doc.location.hash = '#' + hash;
+            doc[ str_location ].hash = '#' + hash;
           }
         };
         
@@ -211,14 +221,14 @@
           $(window).trigger( str_hashchange );
           
         } else if ( history_hash !== last_hash ) {
-          loc.href = loc.href.replace( /#.*/, '' ) + '#' + history_hash;
+          window[ str_location ][ str_href ] = window[ str_location ][ str_href ].replace( /#.*/, '' ) + '#' + history_hash;
         }
         
         timeout_id = setTimeout( loopy, $[ str_hashchange + 'Delay' ] );
       })();
     };
     
-    // Stop the polling loop, but only if an IE6/7 IFRAME wasn't created. In
+    // Stop the polling loop, but only if an IE6/7 Iframe wasn't created. In
     // that case, even if there are no longer any bound event handlers, the
     // polling loop is still necessary for back/next to work at all!
     self.stop = function() {
