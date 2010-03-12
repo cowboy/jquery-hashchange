@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v1.4.2pre
+ * jQuery JavaScript Library v1.4.2
  * http://jquery.com/
  *
  * Copyright 2010, John Resig
@@ -11,7 +11,7 @@
  * Copyright 2010, The Dojo Foundation
  * Released under the MIT, BSD, and GPL Licenses.
  *
- * Date: Thu Feb 11 01:42:51 2010 -0500
+ * Date: Sat Feb 13 22:33:48 2010 -0500
  */
 (function( window, undefined ) {
 
@@ -184,7 +184,7 @@ jQuery.fn = jQuery.prototype = {
 	selector: "",
 
 	// The current version of jQuery being used
-	jquery: "1.4.2pre",
+	jquery: "1.4.2",
 
 	// The default length of a jQuery object is 0
 	length: 0,
@@ -214,7 +214,14 @@ jQuery.fn = jQuery.prototype = {
 	// (returning the new matched element set)
 	pushStack: function( elems, name, selector ) {
 		// Build a new jQuery matched element set
-		var ret = jQuery( elems || null );
+		var ret = jQuery();
+
+		if ( jQuery.isArray( elems ) ) {
+			push.apply( ret, elems );
+		
+		} else {
+			jQuery.merge( ret, elems );
+		}
 
 		// Add the old object onto the stack (as a reference)
 		ret.prevObject = this;
@@ -229,18 +236,6 @@ jQuery.fn = jQuery.prototype = {
 
 		// Return the newly-formed element set
 		return ret;
-	},
-
-	// Force the current matched set of elements to become
-	// the specified array of elements (destroying the stack in the process)
-	// You should use pushStack() in order to do this, but maintain the stack
-	setArray: function( elems ) {
-		// Resetting the length to 0, then using the native Array push
-		// is a super-fast way to populate an object with array-like properties
-		this.length = 0;
-		push.apply( this, elems );
-
-		return this;
 	},
 
 	// Execute a callback for every element in the matched set.
@@ -502,6 +497,9 @@ jQuery.extend({
 		if ( typeof data !== "string" || !data ) {
 			return null;
 		}
+
+		// Make sure leading/trailing whitespace is removed (IE can't handle it)
+		data = jQuery.trim( data );
 		
 		// Make sure the incoming data is actual JSON
 		// Logic borrowed from http://json.org/json2.js
@@ -818,7 +816,7 @@ function access( elems, key, value, exec, fn, pass ) {
 	}
 	
 	// Getting an attribute
-	return length ? fn( elems[0], key ) : null;
+	return length ? fn( elems[0], key ) : undefined;
 }
 
 function now() {
@@ -882,7 +880,10 @@ function now() {
 		// (WebKit defaults to false instead of true, IE too, if it's in an optgroup)
 		optSelected: document.createElement("select").appendChild( document.createElement("option") ).selected,
 
+		parentNode: div.removeChild( div.appendChild( document.createElement("div") ) ).parentNode === null,
+
 		// Will be defined later
+		deleteExpando: true,
 		checkClone: false,
 		scriptEval: false,
 		noCloneEvent: true,
@@ -902,6 +903,15 @@ function now() {
 	if ( window[ id ] ) {
 		jQuery.support.scriptEval = true;
 		delete window[ id ];
+	}
+
+	// Test to see if it's possible to delete an expando from an element
+	// Fails in Internet Explorer
+	try {
+		delete script.test;
+	
+	} catch(e) {
+		jQuery.support.deleteExpando = false;
 	}
 
 	root.removeChild( script );
@@ -934,6 +944,7 @@ function now() {
 		document.body.appendChild( div );
 		jQuery.boxModel = jQuery.support.boxModel = div.offsetWidth === 2;
 		document.body.removeChild( div ).style.display = 'none';
+
 		div = null;
 	});
 
@@ -1053,15 +1064,11 @@ jQuery.extend({
 
 		// Otherwise, we want to remove all of the element's data
 		} else {
-			// Clean up the element expando
-			try {
-				delete elem[ expando ];
-			} catch( e ) {
-				// IE has trouble directly removing the expando
-				// but it's ok with using removeAttribute
-				if ( elem.removeAttribute ) {
-					elem.removeAttribute( expando );
-				}
+			if ( jQuery.support.deleteExpando ) {
+				delete elem[ jQuery.expando ];
+
+			} else if ( elem.removeAttribute ) {
+				elem.removeAttribute( jQuery.expando );
 			}
 
 			// Completely remove the data cache
@@ -1106,25 +1113,7 @@ jQuery.fn.extend({
 		});
 	}
 });
-
-var removeExpando = function( elem ) {
-	delete elem[ expando ];
-};
-
-try {
-	var div = document.createElement("div");
-	div[ expando ] = true;
-	delete div[ expando ];
-	
-} catch( e ) {
-	// IE has trouble directly removing the expando
-	// but it's ok with using removeAttribute
-	removeExpando = function( elem ) {
-		if ( elem.removeAttribute ) {
-			elem.removeAttribute( expando );
-		}
-	};
-}jQuery.extend({
+jQuery.extend({
 	queue: function( elem, type, data ) {
 		if ( !elem ) {
 			return;
@@ -1256,12 +1245,13 @@ jQuery.fn.extend({
 						elem.className = value;
 
 					} else {
-						var className = " " + elem.className + " ";
+						var className = " " + elem.className + " ", setClass = elem.className;
 						for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
 							if ( className.indexOf( " " + classNames[c] + " " ) < 0 ) {
-								elem.className += " " + classNames[c];
+								setClass += " " + classNames[c];
 							}
 						}
+						elem.className = jQuery.trim( setClass );
 					}
 				}
 			}
@@ -1664,6 +1654,10 @@ jQuery.event = {
 			
 			if ( special.add ) { 
 				special.add.call( elem, handleObj ); 
+
+				if ( !handleObj.handler.guid ) {
+					handleObj.handler.guid = handler.guid;
+				}
 			}
 
 			// Add the function to the element's handler list
@@ -2156,27 +2150,24 @@ var withinElement = function( event ) {
 	// Check if mouse(over|out) are still within the same parent element
 	var parent = event.relatedTarget;
 
-	// Traverse up the tree
-	while ( parent && parent !== this ) {
-		// Firefox sometimes assigns relatedTarget a XUL element
-		// which we cannot access the parentNode property of
-		try {
+	// Firefox sometimes assigns relatedTarget a XUL element
+	// which we cannot access the parentNode property of
+	try {
+		// Traverse up the tree
+		while ( parent && parent !== this ) {
 			parent = parent.parentNode;
-
-		// assuming we've left the element since we most likely mousedover a xul element
-		} catch(e) {
-			break;
 		}
-	}
 
-	if ( parent !== this ) {
-		// set the correct event type
-		event.type = event.data;
+		if ( parent !== this ) {
+			// set the correct event type
+			event.type = event.data;
 
-		// handle event if we actually just moused on to a non sub-element
-		jQuery.event.handle.apply( this, arguments );
-	}
+			// handle event if we actually just moused on to a non sub-element
+			jQuery.event.handle.apply( this, arguments );
+		}
 
+	// assuming we've left the element since we most likely mousedover a xul element
+	} catch(e) { }
 },
 
 // In case of event delegation, we only need to rename the event.type,
@@ -2321,6 +2312,10 @@ if ( !jQuery.support.changeBubbles ) {
 		},
 
 		setup: function( data, namespaces ) {
+			if ( this.type === "file" ) {
+				return false;
+			}
+
 			for ( var type in changeFilters ) {
 				jQuery.event.add( this, type + ".specialChange", changeFilters[type] );
 			}
@@ -2469,9 +2464,16 @@ jQuery.fn.extend({
 	}
 });
 
+var liveMap = {
+	focus: "focusin",
+	blur: "focusout",
+	mouseenter: "mouseover",
+	mouseleave: "mouseout"
+};
+
 jQuery.each(["live", "die"], function( i, name ) {
 	jQuery.fn[ name ] = function( types, data, fn, origSelector /* Internal Use Only */ ) {
-		var type, i = 0, match, namespaces,
+		var type, i = 0, match, namespaces, preType,
 			selector = origSelector || this.selector,
 			context = origSelector ? this : jQuery( this.context );
 
@@ -2491,18 +2493,26 @@ jQuery.each(["live", "die"], function( i, name ) {
 				type = type.replace( rnamespaces, "" );
 			}
 
-			type = type === "focus" ? "focusin" : // focus --> focusin
-					type === "blur" ? "focusout" : // blur --> focusout
-					type === "hover" ? types.push("mouseleave" + namespaces) && "mouseenter" : // hover support
-					type;
+			if ( type === "hover" ) {
+				types.push( "mouseenter" + namespaces, "mouseleave" + namespaces );
+				continue;
+			}
 
-			type += namespaces;
+			preType = type;
+
+			if ( type === "focus" || type === "blur" ) {
+				types.push( liveMap[ type ] + namespaces );
+				type = type + namespaces;
+
+			} else {
+				type = (liveMap[ type ] || type) + namespaces;
+			}
 
 			if ( name === "live" ) {
 				// bind live handler
 				context.each(function(){
 					jQuery.event.add( this, liveConvert( type, selector ),
-						{ data: data, selector: selector, handler: fn, origType: type, origHandler: fn } );
+						{ data: data, selector: selector, handler: fn, origType: type, origHandler: fn, preType: preType } );
 				});
 
 			} else {
@@ -2521,7 +2531,7 @@ function liveHandler( event ) {
 		events = jQuery.data( this, "events" );
 
 	// Make sure we avoid non-left-click bubbling in Firefox (#3861)
-	if ( event.liveFired === this || !events || event.button && event.type === "click" ) {
+	if ( event.liveFired === this || !events || !events.live || event.button && event.type === "click" ) {
 		return;
 	}
 
@@ -2551,7 +2561,7 @@ function liveHandler( event ) {
 				related = null;
 
 				// Those two events require additional checking
-				if ( handleObj.origType === "mouseenter" || handleObj.origType === "mouseleave" ) {
+				if ( handleObj.preType === "mouseenter" || handleObj.preType === "mouseleave" ) {
 					related = jQuery( event.relatedTarget ).closest( handleObj.selector )[0];
 				}
 
@@ -3323,8 +3333,10 @@ var makeArray = function(array, results) {
 
 // Perform a simple check to determine if the browser is capable of
 // converting a NodeList to an array using builtin methods.
+// Also verifies that the returned array holds DOM nodes
+// (which is not the case in the Blackberry browser)
 try {
-	Array.prototype.slice.call( document.documentElement.childNodes, 0 );
+	Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
 
 // Provide a fallback method if it does not work
 } catch(e){
@@ -3665,7 +3677,7 @@ jQuery.find = Sizzle;
 jQuery.expr = Sizzle.selectors;
 jQuery.expr[":"] = jQuery.expr.filters;
 jQuery.unique = Sizzle.uniqueSort;
-jQuery.getText = getText;
+jQuery.text = getText;
 jQuery.isXMLDoc = isXML;
 jQuery.contains = contains;
 
@@ -3952,7 +3964,7 @@ var rinlinejQuery = / jQuery\d+="(?:\d+|null)"/g,
 	rtagName = /<([\w:]+)/,
 	rtbody = /<tbody/i,
 	rhtml = /<|&#?\w+;/,
-	rnocache = /<script|<object|<embed/i,
+	rnocache = /<script|<object|<embed|<option|<style/i,
 	rchecked = /checked\s*(?:[^=]|=\s*.checked.)/i,  // checked="checked" or checked (html5)
 	fcloseTag = function( all, front, tag ) {
 		return rselfClosing.test( tag ) ?
@@ -3992,7 +4004,7 @@ jQuery.fn.extend({
 			return this.empty().append( (this[0] && this[0].ownerDocument || document).createTextNode( text ) );
 		}
 
-		return jQuery.getText( this );
+		return jQuery.text( this );
 	},
 
 	wrapAll: function( html ) {
@@ -4247,7 +4259,7 @@ jQuery.fn.extend({
 	},
 
 	domManip: function( args, table, callback ) {
-		var results, first, value = args[0], scripts = [], fragment;
+		var results, first, value = args[0], scripts = [], fragment, parent;
 
 		// We can't cloneNode fragments that contain checked, in WebKit
 		if ( !jQuery.support.checkClone && arguments.length === 3 && typeof value === "string" && rchecked.test( value ) ) {
@@ -4265,9 +4277,12 @@ jQuery.fn.extend({
 		}
 
 		if ( this[0] ) {
+			parent = value && value.parentNode;
+
 			// If we're in a fragment, just use that instead of building a new one
-			if ( args[0] && args[0].parentNode && args[0].parentNode.nodeType === 11 ) {
-				results = { fragment: args[0].parentNode };
+			if ( jQuery.support.parentNode && parent && parent.nodeType === 11 && parent.childNodes.length === this.length ) {
+				results = { fragment: parent };
+
 			} else {
 				results = buildFragment( args, this, scripts );
 			}
@@ -4376,9 +4391,10 @@ jQuery.each({
 	replaceAll: "replaceWith"
 }, function( name, original ) {
 	jQuery.fn[ name ] = function( selector ) {
-		var ret = [], insert = jQuery( selector );
+		var ret = [], insert = jQuery( selector ),
+			parent = this.length === 1 && this[0].parentNode;
 		
-		if ( this.length === 1 && this[0].parentNode && this[0].parentNode.nodeType === 11 && insert.length === 1 ) {
+		if ( parent && parent.nodeType === 11 && parent.childNodes.length === 1 && insert.length === 1 ) {
 			insert[ original ]( this[0] );
 			return this;
 			
@@ -4490,7 +4506,9 @@ jQuery.extend({
 	},
 	
 	cleanData: function( elems ) {
-		var data, id, cache = jQuery.cache;
+		var data, id, cache = jQuery.cache,
+			special = jQuery.event.special,
+			deleteExpando = jQuery.support.deleteExpando;
 		
 		for ( var i = 0, elem; (elem = elems[i]) != null; i++ ) {
 			id = elem[ jQuery.expando ];
@@ -4499,12 +4517,22 @@ jQuery.extend({
 				data = cache[ id ];
 				
 				if ( data.events ) {
-					for ( var event in data.events ) {
-						removeEvent( elem, event, data.handle );
+					for ( var type in data.events ) {
+						if ( special[ type ] ) {
+							jQuery.event.remove( elem, type );
+
+						} else {
+							removeEvent( elem, type, data.handle );
+						}
 					}
 				}
 				
-				removeExpando( elem );
+				if ( deleteExpando ) {
+					delete elem[ jQuery.expando ];
+
+				} else if ( elem.removeAttribute ) {
+					elem.removeAttribute( jQuery.expando );
+				}
 				
 				delete cache[ id ];
 			}

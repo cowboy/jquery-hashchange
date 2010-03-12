@@ -22,7 +22,7 @@ function run_many_tests() {
     result;
   
   function set_result( i, test ) {
-    result = $.isArray( test )
+    result = {}.toString.call( test ) === '[object Array]' // 1.2.6 didn't have $.toArray()
       ? func_each.apply( this, test )
       : $.isFunction( test )
         ? test( result )

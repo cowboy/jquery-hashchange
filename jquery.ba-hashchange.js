@@ -35,7 +35,7 @@
 // tested with, what browsers it has been tested in, and where the unit tests
 // reside (so you can test it yourself).
 // 
-// jQuery Versions - 1.3.2, 1.4.1, 1.4.2pre
+// jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
 // Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-4, Chrome, Opera 9.6-10.1.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
