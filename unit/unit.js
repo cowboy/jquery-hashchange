@@ -54,11 +54,16 @@ function run_many_tests() {
 
 var hash;
 
-// Pulled out of the plugin
+// Pulled out of the plugin, pretty much.
 function get_fragment( url ) {
   url = url || location.href;
   return url.replace( /^[^#]*#?(.*)$/, '$1' );
 };
+
+if ( window.document_domain_set ) {
+  $.hashchangeIframeSrc = '../document-domain.html';
+  $.hashchangeDomain = document.domain;
+}
 
 // Event can be bound before DOM ready.
 $(window).bind( 'hashchange', function(e) {
@@ -66,7 +71,6 @@ $(window).bind( 'hashchange', function(e) {
 });
 
 $(function(){
-  
   $('#jq_version').html( $.fn.jquery );
   
   module( 'jQuery hashchange event' );
