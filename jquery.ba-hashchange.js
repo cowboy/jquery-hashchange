@@ -59,7 +59,8 @@
 //         <jQuery.hashchangeIframeSrc> properties and document-domain.html
 //         file to address access denied issues when setting document.domain in
 //         IE6/7. Note that when using <jQuery.hashchangeIframeSrc>, history
-//         won't be recorded in IE6/7 until the Iframe src file loads.
+//         won't be recorded in IE6/7 until the Iframe src file loads. Lowered
+//         the default <jQuery.hashchangeDelay> to 50 milliseconds.
 // 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
 //         from a page on another domain would cause an error in Safari 4. Also,
 //         IE6/7 Iframe is now inserted after the body (this actually works),
@@ -106,9 +107,9 @@
   // Property: jQuery.hashchangeDelay
   // 
   // The numeric interval (in milliseconds) at which the <hashchange event>
-  // polling loop executes. Defaults to 100.
+  // polling loop executes. Defaults to 50.
   
-  $[ str_hashchange + 'Delay' ] = 100;
+  $[ str_hashchange + 'Delay' ] = 50;
   
   // Property: jQuery.hashchangeDomain
   // 
