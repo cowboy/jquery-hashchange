@@ -32,6 +32,9 @@ function draw_shell() {
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Ben Alman &raquo; <?= $shell['title1'] ?><? if ( $shell['title2'] ) { print ' &raquo; ' . $shell['title2']; } ?><? if ( $shell['title3'] ) { print ' &raquo; ' . $shell['title3']; } ?></title>
+  
+  <?= $shell['html_head_pre'] ?>
+
   <script type="text/javascript" src="<?= $base ?>../shared/ba-debug.js"></script>
   <?
   if ( $shell['jquery'] ) {
