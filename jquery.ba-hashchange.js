@@ -60,7 +60,9 @@
 //         file to address access denied issues when setting document.domain in
 //         IE6/7. Note that when using <jQuery.hashchangeIframeSrc>, history
 //         won't be recorded in IE6/7 until the Iframe src file loads. Lowered
-//         the default <jQuery.hashchangeDelay> to 50 milliseconds.
+//         the default <jQuery.hashchangeDelay> to 50 milliseconds. Attempt to
+//         make Iframe as hidden as possible by using techniques from
+//         http://www.paciellogroup.com/blog/?p=604.
 // 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
 //         from a page on another domain would cause an error in Safari 4. Also,
 //         IE6/7 Iframe is now inserted after the body (this actually works),
@@ -245,8 +247,9 @@
           iframe_src = $[ str_hashchange + 'IframeSrc' ];
           iframe_src = iframe_src && iframe_src + get_fragment();
           
-          // Create hidden Iframe.
-          iframe = $('<iframe/>').hide()
+          // Create hidden Iframe. Attempt to make Iframe as hidden as possible
+          // by using techniques from http://www.paciellogroup.com/blog/?p=604.
+          iframe = $('<iframe tabindex="-1" title="empty"/>').hide()
             
             // When Iframe has completely loaded, initialize the history and
             // start polling.
