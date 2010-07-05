@@ -81,14 +81,12 @@
 (function($,window,undefined){
   '$:nomunge'; // Used by YUI compressor.
   
-  // Method / object references.
-  var fake_onhashchange,
-    jq_event_special = $.event.special,
+  // Reused string.
+  var str_hashchange = 'hashchange',
     
-    // Reused strings.
-    str_location = 'location',
-    str_hashchange = 'hashchange',
-    str_href = 'href',
+    // Method / object references.
+    fake_onhashchange,
+    jq_event_special = $.event.special,
     
     // IE6/7 specifically need some special love when it comes to back-button
     // support, so let's do a little browser sniffing..
@@ -102,7 +100,7 @@
   // Get location.hash (or what you'd expect location.hash to be) sans any
   // leading #. Thanks for making this necessary, Firefox!
   function get_fragment( url ) {
-    url = url || window[ str_location ][ str_href ];
+    url = url || location.href;
     return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
   };
   
@@ -227,7 +225,7 @@
         $(window).trigger( str_hashchange );
         
       } else if ( history_hash !== last_hash ) {
-        window[ str_location ][ str_href ] = window[ str_location ][ str_href ].replace( /#.*/, '' ) + history_hash;
+        location.href = location.href.replace( /#.*/, '' ) + history_hash;
       }
       
       timeout_id = setTimeout( poll, $[ str_hashchange + 'Delay' ] );
@@ -274,7 +272,7 @@
       
       // Get history by looking at the hidden Iframe's location.hash.
       history_get = function() {
-        return get_fragment( iframe[ str_location ][ str_href ] );
+        return get_fragment( iframe.location.href );
       };
       
       // Set a new history item by opening and then closing the Iframe
@@ -288,7 +286,7 @@
           domain && doc.write( '<script>document.domain="' + domain + '"</script>' );
           doc.close();
           
-          iframe[ str_location ].hash = hash;
+          iframe.location.hash = hash;
         }
       };
       
