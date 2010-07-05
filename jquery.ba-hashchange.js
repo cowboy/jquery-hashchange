@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.3pre - 5/23/2010
+ * jQuery hashchange event - v1.3pre - 7/5/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.3pre, Last updated: 5/23/2010*
+// *Version: 1.3pre, Last updated: 7/5/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -37,7 +37,7 @@
 // reside (so you can test it yourself).
 // 
 // jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-4, Chrome 4-5, Opera 9.6-10.5.
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-5, Chrome 3-5, Opera 9.6-10.5.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
 // About: Known issues
@@ -54,7 +54,7 @@
 // 
 // About: Release History
 // 
-// 1.3pre   - (5/23/2010) Reorganized IE6/7 Iframe code to make it more
+// 1.3pre   - (7/5/2010) Reorganized IE6/7 Iframe code to make it more
 //         "removable" for mobile development. Added <jQuery.hashchangeDomain>,
 //         <jQuery.hashchangeIframeSrc> properties and document-domain.html
 //         file to address access denied issues when setting document.domain in
@@ -139,10 +139,10 @@
   // Event: hashchange event
   // 
   // Fired when location.hash changes. In browsers that support it, the native
-  // window.onhashchange event is used (IE8, FF3.6), otherwise a polling loop is
-  // initialized, running every <jQuery.hashchangeDelay> milliseconds to see if
-  // the hash has changed. In IE 6 and 7, a hidden Iframe is created to allow
-  // the back button and hash-based history to work.
+  // HTML5 window.onhashchange event is used (IE8, FF3.6), otherwise a polling
+  // loop is initialized, running every <jQuery.hashchangeDelay> milliseconds
+  // to see if the hash has changed. In IE 6 and 7, a hidden Iframe is created
+  // to allow the back button and hash-based history to work.
   // 
   // Usage:
   // 
@@ -160,7 +160,7 @@
   //   example) use $(window).trigger( 'hashchange' );
   // * The event can be bound before DOM ready, but since it won't be usable
   //   before then in IE6/7 (due to the necessary Iframe), recommended usage is
-  //   to bind it inside a $(document).ready() callback.
+  //   to bind it inside a DOM ready callback.
   
   jq_event_special[ str_hashchange ] = $.extend( jq_event_special[ str_hashchange ], {
     

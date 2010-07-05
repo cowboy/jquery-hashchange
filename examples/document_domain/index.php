@@ -126,7 +126,7 @@ ob_start();
 <?= $shell['donate'] ?>
 
 <p>
-  <a href="http://benalman.com/projects/jquery-hashchange-plugin/">jQuery hashchange event</a> enables very basic bookmarkable #hash history via a cross-browser window.onhashchange event. <em>This example is exactly like the basic <a href="../hashchange/">hashchange event example</a> except that document.domain is set, and the exaple code has been modifed accordingly.</em>
+  <a href="http://benalman.com/projects/jquery-hashchange-plugin/">jQuery hashchange event</a> enables very basic bookmarkable #hash history via a cross-browser window.onhashchange event. <em>This example is exactly like the basic <a href="../hashchange/">hashchange event example</a> except that document.domain is set, and the example code has been modifed accordingly.</em>
 </p>
 
 <h3>Click, and watch as the magic happens!</h3>
