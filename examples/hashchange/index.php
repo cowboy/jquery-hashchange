@@ -19,6 +19,9 @@ $(function(){
   $(window).bind( 'hashchange', function(){
     var hash = location.hash;
     
+    // Set the page title based on the hash.
+    document.title = 'The hash is ' + ( hash.replace( /^#/, '' ) || 'blank' ) + '.';
+    
     // Iterate over all nav links, setting the "selected" class as-appropriate.
     $('#nav a').each(function(){
       var that = $(this);

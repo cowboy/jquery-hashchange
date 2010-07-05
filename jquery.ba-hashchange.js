@@ -14,7 +14,7 @@
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
 // Source       - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.js
-// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (1.3kb)
+// (Minified)   - http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js (0.8kb gzipped)
 // 
 // About: License
 // 
@@ -37,7 +37,7 @@
 // reside (so you can test it yourself).
 // 
 // jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-3.7, Safari 3-5, Chrome 3-5, Opera 9.6-10.5.
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Safari 3-5, Chrome 3-5, Opera 9.6-10.5.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
 // About: Known issues
@@ -60,9 +60,9 @@
 //         file to address access denied issues when setting document.domain in
 //         IE6/7. Note that when using <jQuery.hashchangeIframeSrc>, history
 //         won't be recorded in IE6/7 until the Iframe src file loads. Lowered
-//         the default <jQuery.hashchangeDelay> to 50 milliseconds. Attempt to
-//         make Iframe as hidden as possible by using techniques from
-//         http://www.paciellogroup.com/blog/?p=604.
+//         the default <jQuery.hashchangeDelay> to 50 milliseconds. Added IE6/7
+//         document.title support. Attempt to make Iframe as hidden as possible
+//         by using techniques from http://www.paciellogroup.com/blog/?p=604.
 // 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
 //         from a page on another domain would cause an error in Safari 4. Also,
 //         IE6/7 Iframe is now inserted after the body (this actually works),
@@ -262,6 +262,19 @@
             // Append Iframe after the end of the body to prevent unnecessary
             // initial page scrolling (yes, this works).
             .insertAfter( 'body' )[0].contentWindow;
+          
+          // Whenever `document.title` changes, update the Iframe's title to
+          // prettify the back/next history menu entries. Since IE sometimes
+          // errors with "Unspecified error" the very first time this is set
+          // (yes, very useful) wrap this with a try/catch block.
+          document.onpropertychange = function(){
+            try {
+              if ( event.propertyName === 'title' ) {
+                iframe.document.title = document.title;
+              }
+            } catch(e) {}
+          };
+          
         }
       };
       
@@ -279,13 +292,20 @@
       // document, *then* setting its location.hash. If document.domain has
       // been set, update that as well.
       history_set = function( hash, history_hash ) {
+        var doc = iframe.document,
+          domain = $[ str_hashchange + 'Domain' ];
+        
         if ( hash !== history_hash ) {
-          var doc = iframe.document.open(),
-            domain = $[ str_hashchange + 'Domain' ];
+          // Update Iframe with any initial `document.title` that might be set.
+          doc.title = document.title;
           
+          // Opening the Iframe's document after it has been closed is what
+          // actually adds a history entry.
+          doc.open();
           domain && doc.write( '<script>document.domain="' + domain + '"</script>' );
           doc.close();
           
+          // Update the Iframe's hash, for great justice.
           iframe.location.hash = hash;
         }
       };
