@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.3pre - 7/5/2010
+ * jQuery hashchange event - v1.3pre - 7/6/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.3pre, Last updated: 7/5/2010*
+// *Version: 1.3pre, Last updated: 7/6/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -37,7 +37,8 @@
 // reside (so you can test it yourself).
 // 
 // jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Safari 3-5, Chrome 3-5, Opera 9.6-10.5.
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 3-5, Safari 3-5,
+//                   Opera 9.6-10.60, iPhone 3.1, Android 2.1, BlackBerry 4.6-5.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
 // About: Known issues
@@ -54,7 +55,7 @@
 // 
 // About: Release History
 // 
-// 1.3pre   - (7/5/2010) Reorganized IE6/7 Iframe code to make it more
+// 1.3pre   - (7/6/2010) Reorganized IE6/7 Iframe code to make it more
 //         "removable" for mobile development. Added <jQuery.hashchangeDomain>,
 //         <jQuery.hashchangeIframeSrc> properties and document-domain.html
 //         file to address access denied issues when setting document.domain in
@@ -85,17 +86,15 @@
   var str_hashchange = 'hashchange',
     
     // Method / object references.
+    doc = document,
     fake_onhashchange,
     jq_event_special = $.event.special,
     
-    // IE6/7 specifically need some special love when it comes to back-button
-    // support, so let's do a little browser sniffing..
-    browser = $.browser,
-    mode = document.documentMode,
-    is_old_ie = browser.msie && ( mode === undefined || mode < 8 ),
-    
-    // Does the browser support window.onhashchange?
-    supports_onhashchange = 'on' + str_hashchange in window && ( mode === undefined || mode > 7 );
+    // Does the browser support window.onhashchange? Note that IE8 running in
+    // IE7 compatibility mode reports true for 'onhashchange' in window, even
+    // though the event isn't supported, so also test document.documentMode.
+    doc_mode = doc.documentMode,
+    supports_onhashchange = 'on' + str_hashchange in window && ( doc_mode === undefined || doc_mode > 7 );
   
   // Get location.hash (or what you'd expect location.hash to be) sans any
   // leading #. Thanks for making this necessary, Firefox!
@@ -234,12 +233,16 @@
     // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     // vvvvvvvvvvvvvvvvvvv REMOVE IF NOT SUPPORTING IE6/7 vvvvvvvvvvvvvvvvvvv
     // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // 
-    // In IE 6/7, create a hidden Iframe for history handling.
-    is_old_ie && (function(){
-      var iframe,
+    (function(){
+      var browser = $.browser,
+        iframe,
         iframe_src;
       
+      // If browser isn't IE 6/7, abort!! ABORT!!!
+      if ( !browser.msie || browser.version > 7 ) { return; }
+      
+      // When the event is bound and polling starts in IE 6/7, create a hidden
+      // Iframe for history handling.
       self.start = function(){
         if ( !iframe ) {
           iframe_src = $[ str_hashchange + 'IframeSrc' ];
@@ -267,10 +270,10 @@
           // prettify the back/next history menu entries. Since IE sometimes
           // errors with "Unspecified error" the very first time this is set
           // (yes, very useful) wrap this with a try/catch block.
-          document.onpropertychange = function(){
+          doc.onpropertychange = function(){
             try {
               if ( event.propertyName === 'title' ) {
-                iframe.document.title = document.title;
+                iframe.document.title = doc.title;
               }
             } catch(e) {}
           };
@@ -292,18 +295,18 @@
       // document, *then* setting its location.hash. If document.domain has
       // been set, update that as well.
       history_set = function( hash, history_hash ) {
-        var doc = iframe.document,
+        var iframe_doc = iframe.document,
           domain = $[ str_hashchange + 'Domain' ];
         
         if ( hash !== history_hash ) {
           // Update Iframe with any initial `document.title` that might be set.
-          doc.title = document.title;
+          iframe_doc.title = doc.title;
           
           // Opening the Iframe's document after it has been closed is what
           // actually adds a history entry.
-          doc.open();
-          domain && doc.write( '<script>document.domain="' + domain + '"</script>' );
-          doc.close();
+          iframe_doc.open();
+          domain && iframe_doc.write( '<script>document.domain="' + domain + '"</script>' );
+          iframe_doc.close();
           
           // Update the Iframe's hash, for great justice.
           iframe.location.hash = hash;
