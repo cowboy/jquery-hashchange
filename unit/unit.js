@@ -76,7 +76,7 @@ $(function(){
   module( 'jQuery hashchange event' );
   
   test( 'window.onhashchange', function() {
-    expect( 7 );
+    expect( 8 );
     
     var expected_hash, arr = [], msg = 'Testing window.onhashchange and history';
     
@@ -84,7 +84,11 @@ $(function(){
     equals( get_fragment(), 'a', 'hash should be set properly' );
     
     $(window).trigger( 'hashchange' );
-    equals( hash, 'a', 'hashchange triggered manually' );
+    equals( hash, 'a', 'hashchange triggered manually (long form)' );
+    
+    hash = false;
+    $(window).hashchange();
+    equals( hash, 'a', 'hashchange triggered manually (short form)' );
     
     run_many_tests(
       // run asynchronously
@@ -131,7 +135,7 @@ $(function(){
       },
       
       function(result){
-        $(window).bind( 'hashchange', function(evt){
+        $(window).hashchange( function(evt){
           arr.push( get_fragment() );
         });
       },

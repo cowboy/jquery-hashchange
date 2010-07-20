@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.3pre - 7/6/2010
+ * jQuery hashchange event - v1.3pre - 7/17/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.3pre, Last updated: 7/6/2010*
+// *Version: 1.3pre, Last updated: 7/17/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -43,19 +43,23 @@
 // 
 // About: Known issues
 // 
-// While this jQuery hashchange event implementation is quite stable and robust,
-// there are a few unfortunate browser bugs surrounding expected hashchange
-// event-based behaviors, independent of any JavaScript window.onhashchange
-// abstraction. See the following examples for more information:
+// While this jQuery hashchange event implementation is quite stable and
+// robust, there are a few unfortunate browser bugs surrounding expected
+// hashchange event-based behaviors, independent of any JavaScript
+// window.onhashchange abstraction. See the following examples for more
+// information:
 // 
 // Chrome: Back Button - http://benalman.com/code/projects/jquery-hashchange/examples/bug-chrome-back-button/
 // Firefox: Remote XMLHttpRequest - http://benalman.com/code/projects/jquery-hashchange/examples/bug-firefox-remote-xhr/
 // WebKit: Back Button in an Iframe - http://benalman.com/code/projects/jquery-hashchange/examples/bug-webkit-hash-iframe/
 // Safari: Back Button from a different domain - http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/
 // 
+// Also note that should a browser natively support the window.onhashchange 
+// event, but not report that it does, the fallback polling loop will be used.
+// 
 // About: Release History
 // 
-// 1.3pre   - (7/6/2010) Reorganized IE6/7 Iframe code to make it more
+// 1.3pre   - (7/17/2010) Reorganized IE6/7 Iframe code to make it more
 //         "removable" for mobile development. Added <jQuery.hashchangeDomain>,
 //         <jQuery.hashchangeIframeSrc> properties and document-domain.html
 //         file to address access denied issues when setting document.domain in
@@ -64,6 +68,8 @@
 //         the default <jQuery.hashchangeDelay> to 50 milliseconds. Added IE6/7
 //         document.title support. Attempt to make Iframe as hidden as possible
 //         by using techniques from http://www.paciellogroup.com/blog/?p=604.
+//         Added support for the "shortcut" format $(window).hashchange( fn )
+//         and $(window).hashchange() like jQuery does for built-in events.
 // 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
 //         from a page on another domain would cause an error in Safari 4. Also,
 //         IE6/7 Iframe is now inserted after the body (this actually works),
@@ -88,7 +94,7 @@
     // Method / object references.
     doc = document,
     fake_onhashchange,
-    jq_event_special = $.event.special,
+    special = $.event.special,
     
     // Does the browser support window.onhashchange? Note that IE8 running in
     // IE7 compatibility mode reports true for 'onhashchange' in window, even
@@ -114,7 +120,8 @@
   // 
   // If you're setting document.domain in your JavaScript, and you want hash
   // history to work in IE6/7, not only must this property be set, but you must
-  // also set document.domain BEFORE jQuery is loaded into the page.
+  // also set document.domain BEFORE jQuery is loaded into the page. This
+  // property is only applicable to IE6/7.
   // 
   // In addition, the <jQuery.hashchangeIframeSrc> property must be set to the
   // path of the included "document-domain.html" file, which can be renamed or
@@ -123,45 +130,93 @@
   // 
   // Usage:
   // 
-  // $.hashchangeDomain = document.domain;
+  // jQuery.hashchangeDomain = document.domain;
   
   // Property: jQuery.hashchangeIframeSrc
   // 
   // If, for some reason, you need to specify an Iframe src file (for example,
   // when setting document.domain as in <jQuery.hashchangeDomain>), you can do
-  // so using this property.
+  // so using this property. This property is only applicable to IE6/7.
   // 
   // Usage:
   // 
-  // $.hashchangeIframeSrc = 'path/to/file.html';
+  // jQuery.hashchangeIframeSrc = 'path/to/file.html';
+  
+  // Method: jQuery.fn.hashchange
+  // 
+  // Bind a handler to the window.onhashchange event or trigger all bound
+  // window.onhashchange event handlers. This behavior is consistent with
+  // jQuery's built-in event handlers.
+  // 
+  // Usage:
+  // 
+  // > jQuery(window).hashchange( [ handler ] );
+  // 
+  // Arguments:
+  // 
+  //  handler - (Function) Optional handler to be bound to the hashchange
+  //    event. This is a "shortcut" for the more verbose form:
+  //    jQuery(window).bind( 'hashchange', handler ). If handler is omitted,
+  //    all bound window.onhashchange event handlers will be triggered. This
+  //    is a shortcut for the more verbose
+  //    jQuery(window).trigger( 'hashchange' ). These forms are described in
+  //    the <hashchange event> section.
+  // 
+  // Returns:
+  // 
+  //  (jQuery) The initial jQuery collection of elements.
+  
+  // Allow the "shortcut" format $(elem).hashchange( fn ) for binding and
+  // $(elem).hashchange() for triggering, like jQuery does for built-in events.
+  $.fn[ str_hashchange ] = function( fn ) {
+    return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
+  };
   
   // Event: hashchange event
   // 
   // Fired when location.hash changes. In browsers that support it, the native
-  // HTML5 window.onhashchange event is used (IE8, FF3.6), otherwise a polling
-  // loop is initialized, running every <jQuery.hashchangeDelay> milliseconds
-  // to see if the hash has changed. In IE 6 and 7, a hidden Iframe is created
-  // to allow the back button and hash-based history to work.
+  // HTML5 window.onhashchange event is used, otherwise a polling loop is
+  // initialized, running every <jQuery.hashchangeDelay> milliseconds to see if
+  // the hash has changed. In IE 6 and 7, a hidden Iframe is created to allow
+  // the back button and hash-based history to work.
   // 
-  // Usage:
+  // Usage as described in <jQuery.fn.hashchange>:
   // 
-  // > $(window).bind( 'hashchange', function(e) {
+  // > // Bind an event handler.
+  // > jQuery(window).hashchange( function(e) {
   // >   var hash = location.hash;
   // >   ...
   // > });
+  // > 
+  // > // Manually trigger the event handler.
+  // > jQuery(window).hashchange();
+  // 
+  // A more verbose usage that allows for event namespacing:
+  // 
+  // > // Bind an event handler.
+  // > jQuery(window).bind( 'hashchange', function(e) {
+  // >   var hash = location.hash;
+  // >   ...
+  // > });
+  // > 
+  // > // Manually trigger the event handler.
+  // > jQuery(window).trigger( 'hashchange' );
   // 
   // Additional Notes:
   // 
-  // * The polling loop and Iframe are not created until at least one callback
-  //   is actually bound to 'hashchange'.
-  // * If you need the bound callback(s) to execute immediately, in cases where
-  //   the page 'state' exists on page load (via bookmark or page refresh, for
-  //   example) use $(window).trigger( 'hashchange' );
+  // * The polling loop and Iframe are not created until at least one handler
+  //   is actually bound to the 'hashchange' event.
+  // * If you need the bound handler(s) to execute immediately, in cases where
+  //   a location.hash exists on page load, via bookmark or page refresh for
+  //   example, use jQuery(window).hashchange() or the more verbose 
+  //   jQuery(window).trigger( 'hashchange' ).
   // * The event can be bound before DOM ready, but since it won't be usable
   //   before then in IE6/7 (due to the necessary Iframe), recommended usage is
-  //   to bind it inside a DOM ready callback.
+  //   to bind it inside a DOM ready handler.
   
-  jq_event_special[ str_hashchange ] = $.extend( jq_event_special[ str_hashchange ], {
+  // Override existing $.event.special.hashchange methods (allowing this plugin
+  // to be defined after jQuery BBQ in BBQ's source code).
+  special[ str_hashchange ] = $.extend( special[ str_hashchange ], {
     
     // Called only when the first 'hashchange' event is bound to window.
     setup: function() {
@@ -305,7 +360,10 @@
           // Opening the Iframe's document after it has been closed is what
           // actually adds a history entry.
           iframe_doc.open();
+          
+          // Set document.domain for the Iframe document as well, if necessary.
           domain && iframe_doc.write( '<script>document.domain="' + domain + '"</script>' );
+          
           iframe_doc.close();
           
           // Update the Iframe's hash, for great justice.

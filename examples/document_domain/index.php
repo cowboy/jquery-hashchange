@@ -22,7 +22,7 @@ $(function(){
   
   // Bind an event to window.onhashchange that, when the hash changes, gets the
   // hash and adds the class "selected" to any matching nav link.
-  $(window).bind( 'hashchange', function(){
+  $(window).hashchange( function(){
     var hash = location.hash;
     
     // Set the page title based on the hash.
@@ -37,7 +37,7 @@ $(function(){
   
   // Since the event is only triggered when the hash changes, we need to trigger
   // the event now, to handle the hash the page may have loaded with.
-  $(window).trigger( 'hashchange' );
+  $(window).hashchange();
   
 });
 <?

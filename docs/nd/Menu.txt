@@ -54,5 +54,6 @@ Group: Index  {
    Event Index: Events
    File Index: Files
    Property Index: Properties
+   Function Index: Functions
    }  # Group: Index
 

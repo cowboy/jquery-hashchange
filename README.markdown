@@ -1,7 +1,7 @@
 # jQuery hashchange event #
 [http://benalman.com/projects/jquery-hashchange-plugin/](http://benalman.com/projects/jquery-hashchange-plugin/)
 
-Version: 1.3pre, Last updated: 7/6/2010
+Version: 1.3pre, Last updated: 7/17/2010
 
 This jQuery plugin enables very basic bookmarkable #hash history via a cross-browser window.onhashchange event.
 
@@ -13,10 +13,11 @@ Visit the [project page](http://benalman.com/projects/jquery-hashchange-plugin/)
 
 
 ## Examples ##
-This working example, complete with fully commented code, illustrates one way
-in which this plugin can be used.
+These working examples, complete with fully commented code, illustrate a few
+ways in which this plugin can be used.
 
 [http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/](http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/)
+[http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/](http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/)
 
 ## Support and Testing ##
 Information about what version or versions of jQuery this plugin has been
@@ -54,10 +55,13 @@ WebKit: Back Button in an Iframe
 Safari: Back Button from a different domain  
 [http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/](http://benalman.com/code/projects/jquery-hashchange/examples/bug-safari-back-from-diff-domain/)
 
+Also note that should a browser natively support the window.onhashchange 
+event, but not report that it does, the fallback polling loop will be used.
+
 
 ## Release History ##
 
-1.3pre - (7/6/2010) Reorganized IE6/7 Iframe code to make it more "removable" for mobile development. Added jQuery.hashchangeDomain, jQuery.hashchangeIframeSrc properties and document-domain.html file to address access denied issues when setting document.domain in IE6/7. Note that when using jQuery.hashchangeIframeSrc, history won't be recorded in IE6/7 until the Iframe src file loads. Lowered the default jQuery.hashchangeDelay to 50 milliseconds. Added IE6/7 document.title support. Attempt to make Iframe as hidden as possible by using techniques from http://www.paciellogroup.com/blog/?p=604.  
+1.3pre   - (7/17/2010) Reorganized IE6/7 Iframe code to make it more "removable" for mobile development. Added jQuery.hashchangeDomain, jQuery.hashchangeIframeSrc properties and document-domain.html file to address access denied issues when setting document.domain in IE6/7. Note that when using jQuery.hashchangeIframeSrc, history won't be recorded in IE6/7 until the Iframe src file loads. Lowered the default jQuery.hashchangeDelay to 50 milliseconds. Added IE6/7 document.title support. Attempt to make Iframe as hidden as possible by using techniques from http://www.paciellogroup.com/blog/?p=604. Added support for the "shortcut" format $(window).hashchange( fn ) and $(window).hashchange() like jQuery does for built-in events.  
 1.2 - (2/11/2010) Fixed a bug where coming back to a page using this plugin from a page on another domain would cause an error in Safari 4. Also, IE6/7 Iframe is now inserted after the body (this actually works), which prevents the page from scrolling when the event is first bound. Event can also now be bound before DOM ready, but it won't be usable before then in IE6/7.  
 1.1 - (1/21/2010) Incorporated document.documentMode test to fix IE8 bug where browser version is incorrectly reported as 8.0, despite inclusion of the X-UA-Compatible IE=EmulateIE7 meta tag.  
 1.0 - (1/9/2010) Initial Release. Broke out the jQuery BBQ event.special window.onhashchange functionality into a separate plugin for users who want just the basic event & back button support, without all the extra awesomeness that BBQ provides. This plugin will be included as part of jQuery BBQ, but also be available separately.
