@@ -3,8 +3,9 @@ QUnit.jsDump.HTML = false;
 
 (function($){ // START CLOSURE
 
-var is_chrome = /chrome/i.test( navigator.userAgent ),
-  aps = Array.prototype.slice;
+var back_broken = /(?:chrome|blackberry)/i.test( navigator.userAgent ),
+  aps = Array.prototype.slice,
+  opt = Object.prototype.toString;
 
 function notice( txt ) {
   if ( txt ) {
@@ -22,26 +23,27 @@ function run_many_tests() {
     result;
   
   function set_result( i, test ) {
-    result = {}.toString.call( test ) === '[object Array]' // 1.2.6 didn't have $.toArray()
+    result = opt.call( test ) === '[object Array]' // 1.2.6 didn't have $.isArray()
       ? func_each.apply( this, test )
       : $.isFunction( test )
         ? test( result )
         : '';
   };
   
+  function next(){
+    test && test.func && test.func( result );
+    if ( tests.length ) {
+      set_result( 0, tests.shift() );
+      setTimeout( next, delay );
+    } else {
+      func_done && func_done();
+      start();
+    }
+  };
+  
   if ( delay ) {
-    stop();
-    
-    (function loopy(){
-      test && test.func && test.func( result );
-      if ( tests.length ) {
-        set_result( 0, tests.shift() );
-        setTimeout( loopy, delay );
-      } else {
-        func_done && func_done();
-        start();
-      }
-    })();
+    QUnit.stop(); // BlackBerry 5 explodes if "stop()" is called by itself.
+    next();
     
   } else {
     $.each( tests, set_result );
@@ -141,23 +143,24 @@ $(function(){
       },
       
       function(result){
-        !is_chrome && window.history.go( -1 );
+        !back_broken && history.go( -1 );
       },
       
       function(result){
-        !is_chrome && window.history.go( -1 );
+        !back_broken && history.go( -1 );
       },
       
       function(result){
-        !is_chrome && window.history.go( -1 );
+        !back_broken && history.go( -1 );
       },
       
       function(result){
-        if ( is_chrome ) {
+        if ( back_broken ) {
           // Read about this issue here: http://benalman.com/news/2009/09/chrome-browser-history-buggine/
-          ok( true, 'history is sporadically broken in chrome, this is a known bug, so this test is skipped in chrome' );
+          // and here: http://supportforums.blackberry.com/t5/Web-Development/Bold-Browser-Broken-history-go-1/td-p/107541
+          ok( true, 'back button support inconsistent in chrome / blackberry (skip test)' );
         } else {
-          same( arr, ['', 'b', 'a'], 'back button and window.history.go(-1) should work' );
+          same( arr, ['', 'b', 'a'], 'back button and history.go(-1) should work' );
         }
         
         $(window).unbind( 'hashchange' );
