@@ -17,8 +17,8 @@ $(function(){
   // These two properties, set after jQuery and the hashchange event plugin are
   // loaded, only need to be used when document.domain is set (to fix the "access
   // denied" error in IE6/7).
-  $.hashchangeIframeSrc = '../../document-domain.html';
-  $.hashchangeDomain = document.domain;
+  $.fn.hashchange.src = '../../document-domain.html';
+  $.fn.hashchange.domain = document.domain;
   
   // Bind an event to window.onhashchange that, when the hash changes, gets the
   // hash and adds the class "selected" to any matching nav link.

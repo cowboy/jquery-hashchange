@@ -1,5 +1,5 @@
 /*!
- * jQuery hashchange event - v1.3pre - 7/17/2010
+ * jQuery hashchange event - v1.3pre - 7/20/2010
  * http://benalman.com/projects/jquery-hashchange-plugin/
  * 
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -9,7 +9,7 @@
 
 // Script: jQuery hashchange event
 //
-// *Version: 1.3pre, Last updated: 7/17/2010*
+// *Version: 1.3pre, Last updated: 7/20/2010*
 // 
 // Project Home - http://benalman.com/projects/jquery-hashchange-plugin/
 // GitHub       - http://github.com/cowboy/jquery-hashchange/
@@ -37,8 +37,8 @@
 // reside (so you can test it yourself).
 // 
 // jQuery Versions - 1.2.6, 1.3.2, 1.4.1, 1.4.2
-// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 3-5, Safari 3-5,
-//                   Opera 9.6-10.60, iPhone 3.1, Android 2.1, BlackBerry 4.6-5.
+// Browsers Tested - Internet Explorer 6-8, Firefox 2-4, Chrome 3-6, Safari 3-5,
+//                   Opera 9.6-10.60, iPhone 3.1, Android 1.6-2.2, BlackBerry 4.6-5.
 // Unit Tests      - http://benalman.com/code/projects/jquery-hashchange/unit/
 // 
 // About: Known issues
@@ -59,17 +59,17 @@
 // 
 // About: Release History
 // 
-// 1.3pre   - (7/17/2010) Reorganized IE6/7 Iframe code to make it more
-//         "removable" for mobile development. Added <jQuery.hashchangeDomain>,
-//         <jQuery.hashchangeIframeSrc> properties and document-domain.html
+// 1.3pre   - (7/20/2010) Reorganized IE6/7 Iframe code to make it more
+//         "removable" for mobile-only development. Added IE6/7 document.title
+//         support. Attempted to make Iframe as hidden as possible by using
+//         techniques from http://www.paciellogroup.com/blog/?p=604. Added 
+//         support for the "shortcut" format $(window).hashchange( fn ) and
+//         $(window).hashchange() like jQuery provides for built-in events.
+//         Renamed jQuery.hashchangeDelay to <jQuery.fn.hashchange.delay> and
+//         lowered its default value to 50. Added <jQuery.fn.hashchange.domain>
+//         and <jQuery.fn.hashchange.src> properties plus document-domain.html
 //         file to address access denied issues when setting document.domain in
-//         IE6/7. Note that when using <jQuery.hashchangeIframeSrc>, history
-//         won't be recorded in IE6/7 until the Iframe src file loads. Lowered
-//         the default <jQuery.hashchangeDelay> to 50 milliseconds. Added IE6/7
-//         document.title support. Attempt to make Iframe as hidden as possible
-//         by using techniques from http://www.paciellogroup.com/blog/?p=604.
-//         Added support for the "shortcut" format $(window).hashchange( fn )
-//         and $(window).hashchange() like jQuery does for built-in events.
+//         IE6/7.
 // 1.2   - (2/11/2010) Fixed a bug where coming back to a page using this plugin
 //         from a page on another domain would cause an error in Safari 4. Also,
 //         IE6/7 Iframe is now inserted after the body (this actually works),
@@ -109,39 +109,6 @@
     return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
   };
   
-  // Property: jQuery.hashchangeDelay
-  // 
-  // The numeric interval (in milliseconds) at which the <hashchange event>
-  // polling loop executes. Defaults to 50.
-  
-  $[ str_hashchange + 'Delay' ] = 50;
-  
-  // Property: jQuery.hashchangeDomain
-  // 
-  // If you're setting document.domain in your JavaScript, and you want hash
-  // history to work in IE6/7, not only must this property be set, but you must
-  // also set document.domain BEFORE jQuery is loaded into the page. This
-  // property is only applicable to IE6/7.
-  // 
-  // In addition, the <jQuery.hashchangeIframeSrc> property must be set to the
-  // path of the included "document-domain.html" file, which can be renamed or
-  // modified if necessary (note that the document.domain specified must be the
-  // same in both your main JavaScript as well as in this file).
-  // 
-  // Usage:
-  // 
-  // jQuery.hashchangeDomain = document.domain;
-  
-  // Property: jQuery.hashchangeIframeSrc
-  // 
-  // If, for some reason, you need to specify an Iframe src file (for example,
-  // when setting document.domain as in <jQuery.hashchangeDomain>), you can do
-  // so using this property. This property is only applicable to IE6/7.
-  // 
-  // Usage:
-  // 
-  // jQuery.hashchangeIframeSrc = 'path/to/file.html';
-  
   // Method: jQuery.fn.hashchange
   // 
   // Bind a handler to the window.onhashchange event or trigger all bound
@@ -172,13 +139,55 @@
     return fn ? this.bind( str_hashchange, fn ) : this.trigger( str_hashchange );
   };
   
+  // Property: jQuery.fn.hashchange.delay
+  // 
+  // The numeric interval (in milliseconds) at which the <hashchange event>
+  // polling loop executes. Defaults to 50.
+  
+  // Property: jQuery.fn.hashchange.domain
+  // 
+  // If you're setting document.domain in your JavaScript, and you want hash
+  // history to work in IE6/7, not only must this property be set, but you must
+  // also set document.domain BEFORE jQuery is loaded into the page. This
+  // property is only applicable if you are supporting IE6/7 (or IE8 operating
+  // in "IE7 compatibility" mode).
+  // 
+  // In addition, the <jQuery.fn.hashchange.src> property must be set to the
+  // path of the included "document-domain.html" file, which can be renamed or
+  // modified if necessary (note that the document.domain specified must be the
+  // same in both your main JavaScript as well as in this file).
+  // 
+  // Usage:
+  // 
+  // jQuery.fn.hashchange.domain = document.domain;
+  
+  // Property: jQuery.fn.hashchange.src
+  // 
+  // If, for some reason, you need to specify an Iframe src file (for example,
+  // when setting document.domain as in <jQuery.fn.hashchange.domain>), you can
+  // do so using this property. Note that when using this property, history
+  // won't be recorded in IE6/7 until the Iframe src file loads. This property
+  // is only applicable if you are supporting IE6/7 (or IE8 operating in "IE7
+  // compatibility" mode).
+  // 
+  // Usage:
+  // 
+  // jQuery.fn.hashchange.src = 'path/to/file.html';
+  
+  $.fn[ str_hashchange ].delay = 50;
+  /*
+  $.fn[ str_hashchange ].domain = null;
+  $.fn[ str_hashchange ].src = null;
+  */
+  
   // Event: hashchange event
   // 
   // Fired when location.hash changes. In browsers that support it, the native
   // HTML5 window.onhashchange event is used, otherwise a polling loop is
-  // initialized, running every <jQuery.hashchangeDelay> milliseconds to see if
-  // the hash has changed. In IE 6 and 7, a hidden Iframe is created to allow
-  // the back button and hash-based history to work.
+  // initialized, running every <jQuery.fn.hashchange.delay> milliseconds to
+  // see if the hash has changed. In IE6/7 (and IE8 operating in "IE7
+  // compatibility" mode), a hidden Iframe is created to allow the back button
+  // and hash-based history to work.
   // 
   // Usage as described in <jQuery.fn.hashchange>:
   // 
@@ -266,8 +275,8 @@
       timeout_id = undefined;
     };
     
-    // This polling loop checks every $.hashchangeDelay milliseconds to see if
-    // location.hash has changed, and triggers the 'hashchange' event on
+    // This polling loop checks every $.fn.hashchange.delay milliseconds to see
+    // if location.hash has changed, and triggers the 'hashchange' event on
     // window when necessary.
     function poll() {
       var hash = get_fragment(),
@@ -282,25 +291,24 @@
         location.href = location.href.replace( /#.*/, '' ) + history_hash;
       }
       
-      timeout_id = setTimeout( poll, $[ str_hashchange + 'Delay' ] );
+      timeout_id = setTimeout( poll, $.fn[ str_hashchange ].delay );
     };
     
-    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // vvvvvvvvvvvvvvvvvvv REMOVE IF NOT SUPPORTING IE6/7 vvvvvvvvvvvvvvvvvvv
-    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    (function(){
-      var browser = $.browser,
-        iframe,
-        iframe_src;
+    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    // vvvvvvvvvvvvvvvvvvv REMOVE IF NOT SUPPORTING IE6/7/8 vvvvvvvvvvvvvvvvvvv
+    // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    $.browser.msie && !supports_onhashchange && (function(){
+      // Not only do IE6/7 need the "magical" Iframe treatment, but so does IE8
+      // when running in "IE7 compatibility" mode.
       
-      // If browser isn't IE 6/7, abort!! ABORT!!!
-      if ( !browser.msie || browser.version > 7 ) { return; }
+      var iframe,
+        iframe_src;
       
       // When the event is bound and polling starts in IE 6/7, create a hidden
       // Iframe for history handling.
       self.start = function(){
         if ( !iframe ) {
-          iframe_src = $[ str_hashchange + 'IframeSrc' ];
+          iframe_src = $.fn[ str_hashchange ].src;
           iframe_src = iframe_src && iframe_src + get_fragment();
           
           // Create hidden Iframe. Attempt to make Iframe as hidden as possible
@@ -351,7 +359,7 @@
       // been set, update that as well.
       history_set = function( hash, history_hash ) {
         var iframe_doc = iframe.document,
-          domain = $[ str_hashchange + 'Domain' ];
+          domain = $.fn[ str_hashchange ].domain;
         
         if ( hash !== history_hash ) {
           // Update Iframe with any initial `document.title` that might be set.
@@ -372,9 +380,9 @@
       };
       
     })();
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // ^^^^^^^^^^^^^^^^^^^ REMOVE IF NOT SUPPORTING IE6/7 ^^^^^^^^^^^^^^^^^^^
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^^^^^^^ REMOVE IF NOT SUPPORTING IE6/7/8 ^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
     return self;
   })();

@@ -63,8 +63,8 @@ function get_fragment( url ) {
 };
 
 if ( window.document_domain_set ) {
-  $.hashchangeIframeSrc = '../document-domain.html';
-  $.hashchangeDomain = document.domain;
+  $.fn.hashchange.src = '../document-domain.html';
+  $.fn.hashchange.domain = document.domain;
 }
 
 // Event can be bound before DOM ready.
