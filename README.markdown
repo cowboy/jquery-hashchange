@@ -16,7 +16,7 @@ Visit the [project page](http://benalman.com/projects/jquery-hashchange-plugin/)
 These working examples, complete with fully commented code, illustrate a few
 ways in which this plugin can be used.
 
-[http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/](http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/)
+[http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/](http://benalman.com/code/projects/jquery-hashchange/examples/hashchange/)  
 [http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/](http://benalman.com/code/projects/jquery-hashchange/examples/document_domain/)
 
 ## Support and Testing ##
